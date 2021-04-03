@@ -1,14 +1,18 @@
-# AkkaNetBulkBatch
+Ôªø# AkkaNetBulkBatch
 
-## ±‚∫ª¿Œ«¡∂Û
+## Í∏∞Î≥∏Ïù∏ÌîÑÎùº
 
 - docker-compose up -d
 - docker-compose down
 
-## ¿Œ«¡∂Û
+## Ïù∏ÌîÑÎùº
 
-DB : localhost:13306 /root(root)
-ELK(Kibana) : http://localhost:5601/
+- DB : localhost:13306 /root(root)
+- ELK(Kibana) : http://localhost:5601/
 
 
+## Document
+
+- http://wiki.webnori.com/pages/editpage.action?pageId=51937403
+- 
 

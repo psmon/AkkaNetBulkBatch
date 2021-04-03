@@ -53,7 +53,8 @@ namespace BulkBatchApp.Controllers
                     id = userEvent.id + i,                    
                     action_type = userEvent.action_type,
                     action_name = userEvent.action_name + "_" + i,
-                    reg_dt = DateTime.Now
+                    reg_dt = DateTime.Now,
+                    upd_dt = DateTime.Now
                 };
 
                 _insertActor.Tell(bulkEvent);

@@ -51,13 +51,14 @@ namespace BulkBatchApp.Repositories
         public async Task BulkInsertOrUpdateToEventTable(List<TestEvent> testEvents)
         {
             StringBuilder queryStr = new StringBuilder("");
-            queryStr.Append($"INSERT INTO tbl_test_bulk( id, action_type, action_name, reg_dt) VALUES ");
+            queryStr.Append($"INSERT INTO tbl_test_bulk( id, action_type, action_name, upd_dt, reg_dt) VALUES ");
 
             int idx = 0;
             foreach (var testEvent in testEvents)
             {
                 idx++;
-                string appendQuery = $"('{testEvent.id}',{testEvent.action_type},'{testEvent.action_name}','{DateToDbString(testEvent.reg_dt)}')";
+                string appendQuery = $"('{testEvent.id}',{testEvent.action_type},'{testEvent.action_name}','{DateToDbString(testEvent.upd_dt)}'," +
+                    $"'{DateToDbString(testEvent.reg_dt)}')";
                 if (idx == testEvents.Count)
                 {
                     queryStr.AppendLine(appendQuery);
@@ -69,7 +70,7 @@ namespace BulkBatchApp.Repositories
             }
 
             queryStr.AppendLine(@" 
-            ON DUPLICATE KEY UPDATE action_type= VALUES(action_type), action_name=VALUES(action_name), reg_dt=VALUES(reg_dt);
+            ON DUPLICATE KEY UPDATE action_type= VALUES(action_type), action_name=VALUES(action_name), upd_dt=VALUES(upd_dt), reg_dt=VALUES(reg_dt);
             SELECT 1 as result;");
 
             _logger.LogDebug("======= BulkQuery  ========");

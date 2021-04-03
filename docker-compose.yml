@@ -1,16 +1,18 @@
 version: '3.4'
  
 services:
-  mysql:
+  bulk-mysql:
     image: mysql:5.7
     command: --default-authentication-plugin=mysql_native_password
     restart: always
+    volumes:
+      - ./firstsql.mysql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - 13306:3306    
+      - 13306:3306
     environment:
       MYSQL_ROOT_PASSWORD: root
  
-  elasticsearch:
+  bulk-elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
     container_name: elasticsearch
     environment:
@@ -27,12 +29,12 @@ services:
     cap_add:
       - IPC_LOCK
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - bulk-elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
       - 9300:9300
       
-  kibana:
+  bulk-kibana:
     container_name: kibana
     image: docker.elastic.co/kibana/kibana:7.4.0
     restart: always
@@ -41,8 +43,8 @@ services:
     ports:
       - 5601:5601    
     depends_on:
-      - elasticsearch
+      - bulk-elasticsearch
 
 volumes:
-  elasticsearch-data:
+  bulk-elasticsearch-data:
     driver: local

@@ -1,0 +1,19 @@
+/*
+ * Action: 웹노리 테스트 DB생성
+ * Purpose:
+ * 참고 :
+*/
+CREATE DATABASE `webnori` default character set utf8 collate utf8_general_ci;
+USE `webnori`;
+SET NAMES 'utf8';
+	
+CREATE TABLE `tbl_test_bulk`  (
+  `id` varchar(50) NOT NULL COMMENT 'ID',
+  `action_type` int(0) NOT NULL DEFAULT 0 COMMENT '액션Type',
+  `action_name` varchar(50) NOT NULL COMMENT '액션명',
+  `upd_dt` datetime(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '수정 일시',    
+  `reg_dt` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP() COMMENT '등록 일시',
+  PRIMARY KEY (`id`)
+) CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '벌크테스트';
+
+ 

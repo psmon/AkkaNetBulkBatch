@@ -1,4 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Akka.Actor;
+using AkkaDotModule.Config;
+using BulkBatchApp.Actors;
+using BulkBatchApp.Adapters;
+using BulkBatchApp.Config;
+using BulkBatchApp.Repositories;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +14,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using IApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
 
 namespace BulkBatchApp
 {
@@ -29,6 +36,19 @@ namespace BulkBatchApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddSingleton(Configuration.GetSection("AppSettings").Get<AppSettings>());// * AppSettings
+
+            services.AddSingleton<ElasticEngine>();
+
+            services.AddDbContext<EventRepository>();
+
+            // *** Akka Service Setting
+            var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            Console.WriteLine($"ASPNETCORE_ENVIRONMENT:{envName}");
+            var akkaConfig = AkkaLoad.Load(envName, Configuration);
+            var actorSystem = ActorSystem.Create("actorsystem", akkaConfig);
+            services.AddAkka(actorSystem);
 
             // Swagger
             services.AddSwaggerGen(c =>
@@ -100,7 +120,7 @@ namespace BulkBatchApp
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApplicationLifetime lifetime)
         {
             if (env.IsDevelopment())
             {
@@ -123,6 +143,18 @@ namespace BulkBatchApp
             {
                 endpoints.MapControllers();
             });
+
+            lifetime.ApplicationStarted.Register(() =>
+            {
+                var actorSystem = app.ApplicationServices.GetService<ActorSystem>();        // start Akka.NET
+                var elasticEngine = app.ApplicationServices.GetService<IElasticEngine>();   // start ElkClient
+                var serviceScopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
+                AkkaLoad.RegisterActor(
+                    "InsertActor",
+                    actorSystem.ActorOf(Props.Create<InsertActor>(serviceScopeFactory),"InsertActor")
+                );
+            });
+
         }
     }
 }

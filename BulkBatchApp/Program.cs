@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog;
+using NLog.Web;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BulkBatchApp
 {
@@ -13,14 +11,30 @@ namespace BulkBatchApp
     {
         public static void Main(string[] args)
         {
+            var nlogEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            if (nlogEnvironment == "Production")
+            {
+                LogManager.LoadConfiguration("NLog.config");
+            }
+            else
+            {
+                LogManager.LoadConfiguration("NLog.Development.config");
+            }
+
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+.ConfigureWebHostDefaults(webBuilder =>
+{
+webBuilder.UseStartup<Startup>()
+.ConfigureLogging(logging =>
+{
+logging.ClearProviders();
+}).UseNLog();
+});
+        }
     }
 }
